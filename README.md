@@ -45,7 +45,7 @@ Die Währungsumrechnung nutzt aktuelle Wechselkurse, die über eine API abgerufe
 Der Pomodoro-Timer erlaubt es dem User:
 
 1. Die Pomodoro-Lerntechnik mit individuellen Kombinationsmöglichkeiten zu nutzen und
-2. Eine kiurze Statistik über die Lern-Sessions zu erhalten.
+2. Eine kurze Statistik über die Lern-Sessions zu erhalten.
 
 Das Programm bietet eine GUI inkl. Tonsignal an.
 
