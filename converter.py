@@ -4,13 +4,11 @@ import requests  #Notwendige Bibliothek für API-Aufrufe (HTTP-Requests)
 SUPPORTED_CURRENCIES = ["EUR", "USD", "JPY", "GBP", "CAD", "CHF"]
 
 # Haupt-Menü-Funktion
+
 def display_menu():
     """Zeigt das Hauptmenü an und nimmt die Auswahl des Benutzers entgegen."""
-    print("\nWas möchtest du umrechnen?")
-    print("1 = Temperatur")
-    print("2 = Währung")
-    print("0 = Beenden")
-    auswahl = input("Bitte wähle eine Option: ")
+    print("\nWelche Umrechnung möchten Sie durchführen?  1 = Temperatur | 2 = Währung | 0 = Beenden")
+    auswahl = input("Bitte wählen Sie eine Option: ")
     return auswahl
 
 # Temperatur-Konvertierung
@@ -20,15 +18,15 @@ def display_menu():
     """
 def convert_temperature():
     print("\nTemperaturkonvertierung:")
-    print("Du kannst aus folgenden Skalen wählen: C = Celsius, F = Fahrenheit, K = Kelvin")
+    print("Bitte Skala wählen: C = Celsius, F = Fahrenheit, K = Kelvin")
     
     # 1. Eingabe der Skalen und Umwandlung in Großbuchstaben zur Standardisierung
-    von = input("Von welcher Skala möchtest du umrechnen? (C/F/K): ").upper()
-    zu = input("Zu welcher Skala möchtest du umrechnen? (C/F/K): ").upper()
+    von = input("Von welcher Skala möchten Sie umrechnen? (C/F/K): ").upper()
+    zu = input("Zu welcher Skala möchten Sie umrechnen? (C/F/K): ").upper()
     
     # 2. Eingabe des Wertes und Fehlerbehandlung
     try:
-        wert = float(input("Gib den Wert der Ausgangstemperatur ein: "))
+        wert = float(input("Geben Sie den Wert der Ausgangstemperatur ein: "))
     except ValueError:
         # Fängt Fehler ab, wenn der Benutzer keine Zahl eingibt
         print("Ungültige Eingabe! Bitte eine Zahl eingeben.")
@@ -118,7 +116,7 @@ def convert_currency():
     
     # 1. Benutzerführung und Validierung der Währungscodes
     currency_list_str = ", ".join(SUPPORTED_CURRENCIES)
-    print(f"Du kannst nur folgende Währungen verwenden: {currency_list_str}")
+    print(f"Es sind nur folgende Währungen hinterlegt: {currency_list_str}")
     
     # Schleife zur erzwungenen Eingabe eines gültigen Basis-Codes
     while True:
