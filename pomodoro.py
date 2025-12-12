@@ -13,10 +13,10 @@ class PomodoroLogik:  # Timerlogik mit Phasen und Sitzungstyp (1 oder 2 Pomodoro
         self.aktuelle_phase = "bereit"        # "bereit", "lernen", "kurze_pause", "lange_pause"
 
         self.abgeschlossene_pomodoros = 0
-        self.pomodoros_bis_lange_pause = 4
-        self.pomodoros_seit_langer_pause = 0
+        self.pomodoros_bis_lange_pause = 4    # nach 4 Pomodoros → lange Pause
+        self.pomodoros_seit_langer_pause = 0  # Zähler seit letzter langer Pause
 
-        self.pomodoros_pro_sitzung = 1       # 1 bei Standard, 2 bei Kombi
+        self.pomodoros_pro_sitzung = 1        # 1 bei Standard, 2 bei Kombi
 
     def konfiguration_setzen(self, lern_sec, kurz_sec, lang_sec, pomodoros_pro_sitzung):  # Sitzungstyp-Settings setzen
         
@@ -58,6 +58,7 @@ class PomodoroLogik:  # Timerlogik mit Phasen und Sitzungstyp (1 oder 2 Pomodoro
 
             if self.verbleibende_sekunden == 0:
                 if self.aktuelle_phase == "lernen":
+                    # Pomodoros zählen (1 bei Standard, 2 bei Kombi)
                     self.abgeschlossene_pomodoros += self.pomodoros_pro_sitzung
                     self.pomodoros_seit_langer_pause += self.pomodoros_pro_sitzung
                 return True
@@ -75,13 +76,12 @@ class PomodoroLogik:  # Timerlogik mit Phasen und Sitzungstyp (1 oder 2 Pomodoro
         else:
             return "Bereit"
 
-# GUI mit Sitzungstyp-Auswahl:
 
-class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
+class PomodoroAnwendung:  # Fenster mit Sitzungstypen, Limit & Phasenlogik
     def __init__(self, root):
        
         self.root = root
-        self.root.title("Pomodoro-Timer mit Sitzungstypen")
+        self.root.title("Pomodoro-Timer mit Sitzungstypen und Limit")
         self.root.resizable(False, False)
 
         self.logik = PomodoroLogik()
@@ -93,6 +93,13 @@ class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
 
         self.gui_aufbauen()
         self.anzeige_aktualisieren()
+
+        # Fenstergröße fixieren (nicht kleiner machen)
+        self.root.update_idletasks()
+        self.root.minsize(self.root.winfo_width(), self.root.winfo_height())
+
+        # Sitzungstypen je nach Pomodoro-Zähler aktivieren/deaktivieren
+        self.sitzungstyp_optionen_aktualisieren()
 
     def gui_aufbauen(self):  # Erstellung der GUI inkl. Sitzungstypen
         
@@ -158,10 +165,49 @@ class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
         self.button_start = tk.Button(button_frame, text="Start", width=10, command=self.timer_starten)
         self.button_start.grid(row=0, column=0, padx=5)
 
-        self.button_reset = tk.Button(button_frame, text="Reset", width=10, command=self.timer_zuruecksetzen)
-        self.button_reset.grid(row=0, column=1, padx=5)
+        self.button_pause = tk.Button(button_frame, text="Pause", width=10, command=self.timer_pausieren)
+        self.button_pause.grid(row=0, column=1, padx=5)
 
-    def einstellungen_aus_gui_lesen(self):  # Sitzungstyp auslesen und an Logik übergeben
+        self.button_reset = tk.Button(button_frame, text="Reset", width=10, command=self.timer_zuruecksetzen)
+        self.button_reset.grid(row=0, column=2, padx=5)
+
+    def sitzungstyp_optionen_aktualisieren(self):  # Aktiviert/Deaktiviert Sitzungstypen (max. 4 Pomodoros)
+        
+        aktueller_zaehler = self.logik.pomodoros_seit_langer_pause
+        limit = self.logik.pomodoros_bis_lange_pause
+        verbleibend = limit - aktueller_zaehler  # wie viele Pomodoros noch möglich sind
+
+        mapping = [  # Radiobutton, Modusname, Pomodoros dieser Sitzung
+            (self.rb_demo_standard, "demo_standard", 1),
+            (self.rb_standard, "standard", 1),
+            (self.rb_demo_kombi, "demo_kombi", 2),
+            (self.rb_kombi, "kombi", 2),
+        ]
+
+        # Sitzungstyp ausgrauen, wenn er zu viele Pomodoros bringen würde
+        for rb, modus, anzahl in mapping:
+            if anzahl <= verbleibend:
+                rb.config(state="normal")
+            else:
+                rb.config(state="disabled")
+
+        aktueller_modus = self.var_sitzungstyp.get()
+
+        def pomodoros_fuer_modus(m):  # Hilfsfunktion: Anzahl Pomodoros je Modus
+            if m in ("demo_standard", "standard"):
+                return 1
+            elif m in ("demo_kombi", "kombi"):
+                return 2
+            return 999
+
+        # Falls aktueller Modus nicht mehr erlaubt ist → auf passenden Modus wechseln
+        if pomodoros_fuer_modus(aktueller_modus) > verbleibend and verbleibend > 0:
+            for rb, modus, anzahl in mapping:
+                if anzahl <= verbleibend:
+                    self.var_sitzungstyp.set(modus)
+                    break
+
+    def einstellungen_aus_gui_lesen(self):  # Sitzungstyp und lange Pause auslesen, an Logik übergeben
         
         sitzungstyp = self.var_sitzungstyp.get()
 
@@ -183,6 +229,17 @@ class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
             pomodoros_pro_sitzung = 2
         else:
             messagebox.showerror("Fehler", "Bitte einen Sitzungstyp auswählen.")
+            return False
+
+        # Prüfen, ob wir mit dieser Sitzung über 4 Pomodoros kommen würden
+        aktueller_zaehler = self.logik.pomodoros_seit_langer_pause
+        limit = self.logik.pomodoros_bis_lange_pause
+        if aktueller_zaehler + pomodoros_pro_sitzung > limit:
+            messagebox.showerror(
+                "Fehler",
+                "Mit dieser Auswahl würdest du mehr als 4 Pomodoros vor der langen Pause planen.\n"
+                "Bitte eine kleinere Sitzung wählen."
+            )
             return False
 
         lange_pause_wahl = self.var_lange_pause.get()
@@ -219,6 +276,11 @@ class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
         self.anzeige_aktualisieren()
         self.timer_schritt()
 
+    def timer_pausieren(self):  # Pausiert den Timer
+        
+        self.timer_laueft = False
+        self.label_nachricht.config(text="Timer pausiert.")
+
     def timer_zuruecksetzen(self):  # Stoppt Timer und setzt alles zurück
         
         self.timer_laueft = False
@@ -226,6 +288,7 @@ class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
         self.label_nachricht.config(text="Zurückgesetzt.")
         self.anzeige_aktualisieren()
         self.root.configure(bg=self.farbe_bereit)
+        self.sitzungstyp_optionen_aktualisieren()
 
     def timer_schritt(self):  # Wird jede Sekunde aufgerufen, solange der Timer läuft
         
@@ -245,10 +308,11 @@ class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
                     self.logik.kurze_pause_starten()
                     self.label_nachricht.config(text="Lernphase beendet – kurze Pause beginnt!")
             elif self.logik.aktuelle_phase in ("kurze_pause", "lange_pause"):
-                self.label_nachricht.config(text="Pause beendet – drücke Start für die nächste Lernphase.")
+                self.label_nachricht.config(text="Pause beendet – wähle eine neue Sitzung und drücke Start.")
                 self.timer_laueft = False
                 self.logik.nur_phase_zuruecksetzen()
                 self.anzeige_aktualisieren()
+                self.sitzungstyp_optionen_aktualisieren()
                 return
 
         self.root.after(1000, self.timer_schritt)
@@ -269,6 +333,7 @@ class PomodoroAnwendung:  # Fenster mit Sitzungstypen und Phasenlogik
             self.root.configure(bg=self.farbe_pause)
         else:
             self.root.configure(bg=self.farbe_bereit)
+
 
 # Start des Programms:
 
