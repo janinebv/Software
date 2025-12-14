@@ -1,4 +1,4 @@
-import requests  #Notwendige Bibliothek für API-Aufrufe (HTTP-Requests)
+import requests  # Notwendige Bibliothek für API-Aufrufe (HTTP-Requests)
 
 # Unterstützte Währungen: Hier werden nur die wichtigsten Codes festgelegt.
 SUPPORTED_CURRENCIES = ["EUR", "USD", "JPY", "GBP", "CAD", "CHF"]
@@ -6,17 +6,52 @@ SUPPORTED_CURRENCIES = ["EUR", "USD", "JPY", "GBP", "CAD", "CHF"]
 # Haupt-Menü-Funktion
 
 def display_menu():
-    """Zeigt das Hauptmenü an und nimmt die Auswahl des Benutzers entgegen."""
+    """Zeigt das Hauptmenü an und nimmt die Auswahl des Benutzers entgegen.""" # HIER ist der Docstring korrekt eingerückt
     print("\nWelche Umrechnung möchten Sie durchführen?  1 = Temperatur | 2 = Währung | 0 = Beenden")
     auswahl = input("Bitte wählen Sie eine Option: ")
     return auswahl
 
 # Temperatur-Konvertierung
-    """
-    Führt die Temperaturumrechnung zwischen Celsius, Fahrenheit und Kelvin durch.
-    Die Umrechnungsformeln sind direkt im Code hinterlegt.
-    """
+    """ Führt die Temperaturumrechnung zwischen Celsius, Fahrenheit und Kelvin durch.
+    Die Umrechnungsformeln sind direkt im Code hinterlegt. """
+
+# Hilfsfunktionen für Temperatur-Umrechnung 
+
+def c_to_f(celsius):
+    """Konvertiert Celsius nach Fahrenheit."""
+    return celsius * 9/5 + 32
+
+def f_to_c(fahrenheit):
+    """Konvertiert Fahrenheit nach Celsius."""
+    return (fahrenheit - 32) * 5/9
+
+def c_to_k(celsius):
+    """Konvertiert Celsius nach Kelvin."""
+    return celsius + 273.15
+
+def k_to_c(kelvin):
+    """Konvertiert Kelvin nach Celsius."""
+    return kelvin - 273.15
+
+def f_to_k(fahrenheit):
+    """Konvertiert Fahrenheit nach Kelvin (über Celsius)."""
+    # Umrechnung über den Zwischenschritt Celsius, nutzt die definierten Funktionen
+    celsius = f_to_c(fahrenheit)
+    return c_to_k(celsius)
+
+def k_to_f(kelvin):
+    """Konvertiert Kelvin nach Fahrenheit (über Celsius)."""
+    # Umrechnung über den Zwischenschritt Celsius, nutzt die definierten Funktionen
+    celsius = k_to_c(kelvin)
+    return c_to_f(celsius)
+
+
+# Temperatur-Konvertierung (Hauptfunktion)
+
 def convert_temperature():
+    """ Führt die Temperaturumrechnung durch. Nutzt die dedizierten Hilfsfunktionen, 
+    um die Logik der Umrechnung von der Menüführung zu trennen."""
+    
     print("\nTemperaturkonvertierung:")
     print("Bitte Skala wählen: C = Celsius, F = Fahrenheit, K = Kelvin")
     
@@ -34,31 +69,27 @@ def convert_temperature():
     
     ergebnis = None
 
-    # 3. Logik für die Umrechnungsformeln
+    # 3. Logik: Aufruf der dedizierten Umrechnungsfunktionen
     
-    # C ↔ F: Celsius und Fahrenheit
-    if von == "C" and zu == "F":
-        ergebnis = wert * 9/5 + 32 # Formel: C * 9/5 + 32 = F
-    elif von == "F" and zu == "C":
-        ergebnis = (wert - 32) * 5/9 # Formel: (F - 32) * 5/9 = C
-
-    # C ↔ K: Celsius und Kelvin
-    elif von == "C" and zu == "K":
-        ergebnis = wert + 273.15 # Formel: C + 273.15 = K (Absoluter Nullpunkt)
-    elif von == "K" and zu == "C":
-        ergebnis = wert - 273.15
-
-    # F ↔ K: Fahrenheit und Kelvin
-    elif von == "F" and zu == "K":
-        # Hier wird zuerst in Celsius umgerechnet, dann in Kelvin
-        ergebnis = (wert - 32) * 5/9 + 273.15
-    elif von == "K" and zu == "F":
-        # Hier wird zuerst in Celsius umgerechnet, dann in Fahrenheit
-        ergebnis = (wert - 273.15) * 9/5 + 32
-
-    # Sonderfall: Gleiche Einheit
-    elif von == zu:
+    if von == zu:
         ergebnis = wert
+    
+    # C Konvertierungen
+    elif von == "C" and zu == "F":
+        ergebnis = c_to_f(wert)
+    elif von == "F" and zu == "C":
+        ergebnis = f_to_c(wert)
+    elif von == "C" and zu == "K":
+        ergebnis = c_to_k(wert)
+    elif von == "K" and zu == "C":
+        ergebnis = k_to_c(wert)
+
+    # F <-> K Konvertierungen (nutzen die dedizierten Hilfsfunktionen)
+    elif von == "F" and zu == "K":
+        ergebnis = f_to_k(wert)
+    elif von == "K" and zu == "F":
+        ergebnis = k_to_f(wert)
+    
     else:
         print("Ungültige Auswahl der Skalen!")
         return
@@ -71,10 +102,9 @@ def convert_temperature():
 
 # Währungs-API Funktion
 def get_exchange_rates(base="EUR"):
-    """
-    Ruft die aktuellen Wechselkurse von der Frankfurter API ab.
-    Die Kurse basieren auf der angegebenen Basiswährung ('base').
-    """
+    """ Ruft die aktuellen Wechselkurse von der Frankfurter API ab.
+    Die Kurse basieren auf der angegebenen Basiswährung ('base'). """
+    
     # Externe API-Adresse (Frankfurter API ist kostenlos und zuverlässig)
     url = f"https://api.frankfurter.app/latest?from={base}"
     
@@ -107,10 +137,9 @@ def get_exchange_rates(base="EUR"):
         return {}
 
 # Währungs-Konvertierer
-    """
-    Führt die Währungsumrechnung durch. Fragt nach Startwährung, Zielwährung und Betrag, 
-    und nutzt dann die abgerufenen Wechselkurse.
-    """
+    """ Führt die Währungsumrechnung durch. Fragt nach Startwährung, Zielwährung und Betrag, 
+    und nutzt dann die abgerufenen Wechselkurse. """
+
 def convert_currency():
     print("\nWährungskonvertierung:")
     
@@ -157,10 +186,8 @@ def convert_currency():
     print(f"\n{betrag} {base} = {ergebnis:.2f} {ziel}")
 
 # Hauptprogramm
+    """ Die Hauptschleife des Programms. Steuert das Menü und den Programmfluss. """
 
-    """
-    Die Hauptschleife des Programms. Steuert das Menü und den Programmfluss.
-    """
 def main():
     while True:
         auswahl = display_menu()
