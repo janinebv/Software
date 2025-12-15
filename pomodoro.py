@@ -493,3 +493,6 @@ if __name__ == "__main__":  # Eintrittspunkt des Programms
     root = tk.Tk()          # Hauptfenster erzeugen
     app = PomodoroAnwendung(root)  # Anwendung mit Logik & GUI starten
     root.mainloop()         # Ereignisschleife von tkinter starten
+    
+    
+# Ende des Programms ;-)
