@@ -63,3 +63,10 @@ Das Programm bietet eine GUI inkl. Tonsignal an.
 
 
 
+Comments / Feedback: pomodoro-Code:
+
+Der vorliegende Code ist lauffähig und produziert – soweit erkennbar – keine Probleme. Es wurden allerdings enorm viele Funktionen definiert. Das macht das Gesamtprojekt zwar sehr modular, zu hinterfragen wäre allerdings, ob man hier etwas kompakter “bauen” (coden) könnte? 
+
+Die Lesbarkeit für Menschen scheint gut gegeben – es wurden alle Funktionsmodule gut auskommentiert. Insofern das Programm eine Umsetzung eines fertigen Konzepts (“pomodoro-Lenrmethode”) darstellt, ist eine Erweiterung / Ergänzung wsl nicht angedacht. 
+
+Durch die modulare Bauweise ließen sich aber relativ einfach Komponenten hinzufügen. Es müssten dazu aber dann auch im Eingabe-Interface Änderungen vorgenommen werden. Insgesamt ist die Umsetzung komplex – aber gut!
