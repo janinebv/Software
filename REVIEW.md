@@ -22,7 +22,7 @@ Verbesserung: Einige """ ... """-Blöcke stehen außerhalb von Funktionen und si
 
 Zahleneingaben werden bei Temperatur und Währung mit try/except abgefangen, API-Fehler werden gut behandelt (Timeout, verständliche Meldungen).
 
-Verbesserung: Bei der z.B. Temperatur können auch ungültige Buchstaben eingegeben werden (z.B. „G“) und das Programm fragt trotzdem noch nach dem Wert, bevor es den Fehler meldet. Das Programm bei einem Fehler auch direkt nochmal nachfragen.
+Verbesserung: Bei der z.B. Temperatur können auch ungültige Buchstaben eingegeben werden (z.B. „G“) und das Programm fragt trotzdem noch nach dem Wert, bevor es den Fehler meldet. Das Programm könnte bei einem Fehler auch direkt nochmal nachfragen.
 
 
 •  Sicherheit: Timeout beim API-Request wurde bedacht und eingebaut.
