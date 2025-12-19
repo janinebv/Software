@@ -61,5 +61,21 @@ Das Programm bietet eine GUI inkl. Tonsignal an.
 - Python   
 - Git & GitHub für Versionierung und Zusammenarbeit  
 
+# Review der Projekte
 
+## Verarbeitung Review - Team pomodoro
+
+Wir haben im Zuge der Review die folgenden Punkte rausgelesen:
+
+Viele Funktionen / kompakter coden?
+- Entscheidung: Wollen wir nicht ändern
+- Begründung: Bewusste Modularität, bessere Les- und Wartbarkeit, keine künstliche bzw. komplizierten Zusammenfassungen
+
+Kommentare mittels Docstrings reduzieren
+- Entscheidung: Wollen wir nicht ändern
+- Begründung: Fachlich richtig, aber aktuell vom Aufwand her nicht priorisiert, da zu wenige Einsatzmöglichkeiten vorhanden sind. Es sind für alle Bestandteile Kommentare vorhanden.
+
+Vorzeitige Sitzungsabbrüche in Statistik aufnehmen
+- Entscheidung: Haben wir direkt geändert
+- Begründung: Inhaltlich sinnvoll, damit der gesamte Lernaufwand dokumentiert werden kann und nichts auf Grund der Logik verloren geht.
 
