@@ -49,21 +49,28 @@ def k_to_f(kelvin):
 # Temperatur-Konvertierung (Hauptfunktion)
 
 def convert_temperature():
-    """ Führt die Temperaturumrechnung durch. Nutzt die dedizierten Hilfsfunktionen, 
-    um die Logik der Umrechnung von der Menüführung zu trennen."""
+    """Führt die Temperaturumrechnung zwischen Celsius, Fahrenheit und Kelvin durch."""
     
     print("\nTemperaturkonvertierung:")
     print("Bitte Skala wählen: C = Celsius, F = Fahrenheit, K = Kelvin")
     
-    # 1. Eingabe der Skalen und Umwandlung in Großbuchstaben zur Standardisierung
+    valid_scales = ["C", "F", "K"]
+
+    # 1. Eingabe der Skalen
     von = input("Von welcher Skala möchten Sie umrechnen? (C/F/K): ").upper()
+    if von not in valid_scales:
+        print(f"Ungültige Skala: '{von}'! Bitte starten Sie neu.")
+        return
+
     zu = input("Zu welcher Skala möchten Sie umrechnen? (C/F/K): ").upper()
+    if zu not in valid_scales:
+        print(f"Ungültige Skala: '{zu}'! Bitte starten Sie neu.")
+        return
     
-    # 2. Eingabe des Wertes und Fehlerbehandlung
+    # 2. Eingabe des Wertes erfolgt erst nach erfolgreicher Prüfung
     try:
         wert = float(input("Geben Sie den Wert der Ausgangstemperatur ein: "))
     except ValueError:
-        # Fängt Fehler ab, wenn der Benutzer keine Zahl eingibt
         print("Ungültige Eingabe! Bitte eine Zahl eingeben.")
         return
     
@@ -145,7 +152,7 @@ def convert_currency():
     
     # 1. Benutzerführung und Validierung der Währungscodes
     currency_list_str = ", ".join(SUPPORTED_CURRENCIES)
-    print(f"Es sind nur folgende Währungen hinterlegt: {currency_list_str}")
+    print(f"Unterstützte Währungen: {currency_list_str}")
     
     # Schleife zur erzwungenen Eingabe eines gültigen Basis-Codes
     while True:
