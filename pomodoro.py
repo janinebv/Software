@@ -9,7 +9,7 @@ class PomodoroLogik:  # Timer- und Phasenlogik (Lernen, Pausen, Statistik)
         # Standardzeiten in Sekunden (werden später je nach Sitzungstyp überschrieben)
         self.lern_sekunden = 25 * 60          # Lernzeit pro Sitzung
         self.kurze_pause_sekunden = 5 * 60    # Dauer einer kurzen Pause
-        self.lange_pause_seunden = 15 * 60    # Dauer einer langen Pause
+        self.lange_pause_sekunden = 15 * 60   # Dauer einer langen Pause
 
         # Aktueller Status
         self.verbleibende_sekunden = 0        # Restzeit in Sekunden
@@ -32,11 +32,14 @@ class PomodoroLogik:  # Timer- und Phasenlogik (Lernen, Pausen, Statistik)
         # Liste abgeschlossener Lerneinheiten [(thema, sekunden), ...]
         self.sitzungen = []
 
+        # Lernzeit in der aktuell laufenden Lernphase (für Abbruch)
+        self.aktuelle_lernsekunden_in_dieser_phase = 0
+
     def konfiguration_setzen(self, lern_sec, kurz_sec, lang_sec, pomodoros_pro_sitzung, thema):  # Konfiguration für nächste Sitzung setzen
         
         self.lern_sekunden = lern_sec
         self.kurze_pause_sekunden = kurz_sec
-        self.lange_pause_seunden = lang_sec
+        self.lange_pause_sekunden = lang_sec
         self.pomodoros_pro_sitzung = pomodoros_pro_sitzung
         self.thema = thema.strip()
 
@@ -44,6 +47,7 @@ class PomodoroLogik:  # Timer- und Phasenlogik (Lernen, Pausen, Statistik)
         
         self.aktuelle_phase = "lernen"
         self.verbleibende_sekunden = self.lern_sekunden
+        self.aktuelle_lernsekunden_in_dieser_phase = 0  # Startwert für diese Lernphase
 
     def kurze_pause_starten(self):  # Startet eine kurze Pause
         
@@ -53,18 +57,41 @@ class PomodoroLogik:  # Timer- und Phasenlogik (Lernen, Pausen, Statistik)
     def lange_pause_starten(self):  # Startet eine lange Pause
         
         self.aktuelle_phase = "lange_pause"
-        self.verbleibende_sekunden = self.lange_pause_seunden
+        self.verbleibende_sekunden = self.lange_pause_sekunden
 
     def zuruecksetzen(self):  # Setzt Phase und Zähler für lange Pause zurück (Statistik bleibt)
         
         self.aktuelle_phase = "bereit"
         self.verbleibende_sekunden = 0
         self.pomodoros_seit_langer_pause = 0
+        self.aktuelle_lernsekunden_in_dieser_phase = 0
 
     def nur_phase_zuruecksetzen(self):  # Setzt nur die Phase/Restzeit zurück, Statistik bleibt
         
         self.aktuelle_phase = "bereit"
         self.verbleibende_sekunden = 0
+        self.aktuelle_lernsekunden_in_dieser_phase = 0
+
+    def abgebrochene_lernphase_speichern(self):  # Speichert Lernzeit, wenn eine Lernphase vorzeitig abgebrochen wird
+        
+        if self.aktuelle_phase == "lernen" and self.aktuelle_lernsekunden_in_dieser_phase > 0:
+            gelernt = self.aktuelle_lernsekunden_in_dieser_phase  # tatsächlich gelernte Sekunden in dieser Phase
+
+            # Gesamtlernzeit wurde bereits sekündlich erhöht, deshalb hier nichts mehr addieren
+            if self.thema:
+                if self.sitzungen and self.sitzungen[-1][0] == self.thema:
+                    # gleiches Thema wie davor → Zeit hinzufügen
+                    letztes_thema, letzte_sekunden = self.sitzungen[-1]
+                    self.sitzungen[-1] = (letztes_thema, letzte_sekunden + gelernt)
+                else:
+                    # neues Thema bzw. anderes Thema → neuer Eintrag
+                    self.sitzungen.append((self.thema, gelernt))
+
+            # Kein abgeschlossener Pomodoro, daher:
+            # - abgeschlossene_pomodoros NICHT erhöhen
+            # - pomodoros_seit_langer_pause NICHT erhöhen
+
+            self.aktuelle_lernsekunden_in_dieser_phase = 0  # zurücksetzen
 
     def eine_sekunde_vergehen(self):  # Zählt eine Sekunde herunter, aktualisiert Statistik bei Lernende
                                       # True = Phase gerade zu Ende gegangen, sonst False
@@ -74,6 +101,7 @@ class PomodoroLogik:  # Timer- und Phasenlogik (Lernen, Pausen, Statistik)
 
             if self.aktuelle_phase == "lernen":  # Lernsekunde zur Gesamtlernzeit addieren
                 self.gesamt_lern_sekunden += 1
+                self.aktuelle_lernsekunden_in_dieser_phase += 1  # Lernzeit dieser Phase erhöhen
 
             if self.verbleibende_sekunden == 0:  # Phase ist zu Ende
                 if self.aktuelle_phase == "lernen":
@@ -81,15 +109,18 @@ class PomodoroLogik:  # Timer- und Phasenlogik (Lernen, Pausen, Statistik)
                     self.abgeschlossene_pomodoros += self.pomodoros_pro_sitzung
                     self.pomodoros_seit_langer_pause += self.pomodoros_pro_sitzung
 
-                    # Lerneinheit für Statistik speichern
+                    # Lerneinheit für Statistik speichern (hier komplette Lernphase)
+                    gelernt = self.aktuelle_lernsekunden_in_dieser_phase
                     if self.thema:
                         if self.sitzungen and self.sitzungen[-1][0] == self.thema:
                             # gleiches Thema wie davor → Zeit hinzufügen
                             letztes_thema, letzte_sekunden = self.sitzungen[-1]
-                            self.sitzungen[-1] = (letztes_thema, letzte_sekunden + self.lern_sekunden)
+                            self.sitzungen[-1] = (letztes_thema, letzte_sekunden + gelernt)
                         else:
                             # neues Thema bzw. anderes Thema → neuer Eintrag
-                            self.sitzungen.append((self.thema, self.lern_sekunden))
+                            self.sitzungen.append((self.thema, gelernt))
+
+                    self.aktuelle_lernsekunden_in_dieser_phase = 0  # nach abgeschlossener Phase zurücksetzen
 
                 return True  # Phase (lernen/kurze_pause/lange_pause) ist beendet
 
@@ -392,8 +423,11 @@ class PomodoroAnwendung:  # Erstellung des Fensters inkl. Logik und Steuerung
         self.timer_laueft = False
         self.label_nachricht.config(text="Timer pausiert.", fg="black")
 
-    def timer_zuruecksetzen(self):  # Stoppt den Timer und setzt Phase/Zähler zurück
+    def timer_zuruecksetzen(self):  # Stoppt den Timer und setzt Phase/Zähler zurück (aber speichert evtl. Lernzeit)
         
+        # vor dem Zurücksetzen prüfen, ob wir gerade in einer Lernphase waren
+        self.logik.abgebrochene_lernphase_speichern()
+
         self.timer_laueft = False
         self.logik.zuruecksetzen()
         self.label_nachricht.config(text="Zurückgesetzt. Bereit für eine neue Lernphase.", fg="black")
@@ -401,8 +435,11 @@ class PomodoroAnwendung:  # Erstellung des Fensters inkl. Logik und Steuerung
         self.root.configure(bg=self.farbe_bereit)
         self.sitzungstyp_optionen_aktualisieren()
 
-    def lernen_beenden(self):  # Beendet die aktuelle Sitzung (Statistik bleibt sichtbar)
+    def lernen_beenden(self):  # Beendet die aktuelle Sitzung (speichert evtl. Lernzeit, Statistik bleibt sichtbar)
         
+        # vor dem Beenden ggf. Teil-Lernzeit speichern
+        self.logik.abgebrochene_lernphase_speichern()
+
         self.timer_laueft = False
         self.logik.zuruecksetzen()
         self.label_nachricht.config(text="Lerneinheit beendet. Gute Arbeit!", fg="black")
@@ -493,6 +530,5 @@ if __name__ == "__main__":  # Eintrittspunkt des Programms
     root = tk.Tk()          # Hauptfenster erzeugen
     app = PomodoroAnwendung(root)  # Anwendung mit Logik & GUI starten
     root.mainloop()         # Ereignisschleife von tkinter starten
-    
-    
-# Ende des Programms ;-)
+
+# Ende des Programms
