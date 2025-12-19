@@ -38,4 +38,13 @@ Verbesserung: Bei der z.B. Temperatur können auch ungültige Buchstaben eingege
 • Skalierbarkeit: Die Struktur ist gut: Menü, getrennte Funktionen, klare Logik. Optional: Wenn ihr später viele Umrechnungen macht, wäre Caching der Kurse sinnvoll.
 
 
+Feedback von Samara
 
+⦁ Korrektheit: Ja, der Code funktioniert korrekt und erfüllt die Anforderungen gemäß readme.
+⦁ Lesbarkeit: Der Code ist gut lesbar. Persönlich würde ich Docstrings nicht unterhalb von regulären Kommentaren verwenden, da man sonst vielleicht eine Klasse, etc. erwartet, zu der diese nicht gehören.
+⦁ Effizienz: Nach bisherigen Kenntnissen sieht der Code effizient aus und erfüllt den Zweck.
+⦁ Wartbarkeit: Es sind soweit ausreichend Kommentare vorhanden. Nach bisherigem Kenntnisstand wirkt es als könnte man z.B. Module für Schuhgrößen EU zu US einarbeiten, da es dabei um fixe Parameter geht.
+⦁ Fehlerbehandlung: Es gibt bei der API-Anbindung Timeout-Vermeidung und HTTPS-Statuscodes.
+⦁ Einhaltung von Standards: Der Code entspricht den Standards zur Anwendung von python
+⦁ Tests: Es sind keine Testfälle vorhanden. Der Code kann nur durch Ausführung getestet werden.
+⦁ Skalierbarkeit: Der Code wäre skalierbar. Eine Umrechnungslogik kann nach gewissen Parametern ergänzt werden und sollte unkompliziert eingebunden werden können.
